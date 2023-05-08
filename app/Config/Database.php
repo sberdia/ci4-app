@@ -32,11 +32,11 @@ class Database extends Config
 	 */
 	public $default = [
 		'DSN'      => '',
-		'hostname' => 'localhost',
-		'username' => '',
-		'password' => '',
-		'database' => '',
-		'DBDriver' => 'MySQLi',
+		'hostname' => 'NB423\MSSQLSERVEREXP',
+		'username' => 'sa',
+		'password' => 'root',
+		'database' => 'ci4-app',
+		'DBDriver' => 'sqlsrv',
 		'DBPrefix' => '',
 		'pConnect' => false,
 		'DBDebug'  => (ENVIRONMENT !== 'production'),

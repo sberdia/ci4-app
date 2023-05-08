@@ -1,0 +1,1 @@
+1) Revisar csrf en formularios.
