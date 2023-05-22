@@ -7,12 +7,54 @@ use App\Models\UsuarioModel;
 use App\Models\Usuario_RolModel;
 use App\Models\RolModel;
 
-class CHome extends BaseController
-{
+class CHome extends BaseController{
+
 	protected $helpers = ['html'];
 
-	public function index()
-	{
+	public function index(){
+		return $this->app();
+	}
+	
+	public function app(){
+
+		$config = new AppConfig();
+		$session = \Config\Services::session();
+		
+		$dataHeader['str_site_title'] = $config->str_site_title;
+
+		$dataLogin = [
+			'str_login_titulo' => $config->str_login_titulo,
+			'str_login_username' => $config->str_login_username, 
+			'str_login_password' => $config->str_login_password, 
+			'str_login_button_ingresar' => $config->str_login_button_ingresar,
+			'str_site_copyright' => $config->str_site_copyright,
+		];
+
+		if($session->has('usuario_logged_in' && $session->usuario_logged_in == TRUE)){
+			return $this->loadViewHome($config, $dataHeader);
+		} else {
+			return $this->loadViewLogin($config, $dataHeader, $dataLogin);
+		}
+	}
+	
+	public function loadViewHome($config, $dataHeader){
+
+			return view('templates/header', $dataHeader)
+				. view('general/home')
+				. view('templates/footer');
+
+	}
+
+	public function loadViewLogin($config, $dataHeader, $dataLogin){
+
+		return view('templates/header', $dataHeader)
+				. view('security/login', $dataLogin)
+				. view('templates/footer');
+
+	}
+
+	public function login(){
+
 		$config = new AppConfig();
 
 		$dataHeader['str_site_title'] = $config->str_site_title;
@@ -21,14 +63,45 @@ class CHome extends BaseController
 		$dataLogin['str_login_username'] =  $config->str_login_username; 
 		$dataLogin['str_login_password'] =  $config->str_login_password; 
 		$dataLogin['str_login_button_ingresar'] =  $config->str_login_button_ingresar;
-		$dataLogin['str_site_copyright'] =  $config->str_site_copyright; 
+		$dataLogin['str_site_copyright'] =  $config->str_site_copyright;  
+		
+		$rules = [
+			'inputLoginUsername' => 'required|min_length[1]',
+			'inputLoginPassword' => 'required|min_length[1]',
+		];
+          
+        if($this->validate($rules) && 
+		  ($this->loginAuth($this->request->getVar('inputLoginUsername'), $this->request->getVar('inputLoginPassword')))==true){
+				return $this->loadViewHome($config, $dataHeader);
+
+        } else {
+            $dataLogin['validation'] = $this->validator;
+			return $this->loadViewLogin($config, $dataHeader, $dataLogin);
+
+		}
+	}
+
+	/*--------------------------------------------*/
+	public function index_()
+	{
+		$config = new AppConfig();
+
+		$dataHeader['str_site_title'] = $config->str_site_title;
+
+		$dataLogin = [
+			'str_login_titulo' => $config->str_login_titulo,
+			'str_login_username' => $config->str_login_username, 
+			'str_login_password' => $config->str_login_password, 
+			'str_login_button_ingresar' => $config->str_login_button_ingresar,
+			'str_site_copyright' => $config->str_site_copyright,
+		];
 
 		return view('templates/header', $dataHeader)
 				. view('security/login', $dataLogin)
 				. view('templates/footer');
 	}
 
-	public function login()
+	public function login_()
 	{
 		$config = new AppConfig();
 
@@ -55,9 +128,9 @@ class CHome extends BaseController
             $dataLogin['validation'] = $this->validator;
 
 			return view('templates/header', $dataHeader)
-			. view('security/login', $dataLogin)
-			. view('templates/footer');
-        }
+				. view('security/login', $dataLogin)
+				. view('templates/footer');
+			}
 	}
 
 	public function loginAuth($usuario, $contrasena)
@@ -91,7 +164,7 @@ class CHome extends BaseController
 						'usuario_usuario' => $data['usuario'],
 						'usuario_rol_id' => $usuarioRol['id_rol'],
 						'usuario_rol' => $rol['descripcion'],
-						'usuario_loggedin' => TRUE
+						'usuario_logged_in' => TRUE
 					];
 
 					$session->set($session_data);
